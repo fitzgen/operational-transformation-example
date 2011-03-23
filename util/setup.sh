@@ -5,10 +5,11 @@ set -e
 PWD=$(pwd)
 UTILDIR="$PWD/$(dirname $0)"
 ROOT=${UTILDIR/\/util/}
-
 OUTDIR="$ROOT/src/www/js"
 VENDORDIR="$ROOT/src/vendor"
+
 VERSION="1.6.0"
+RJSVERSION="0.24.0"
 
 DOJODIR="dojo-release-${VERSION}-src"
 
@@ -26,15 +27,31 @@ else
 	exit 1
 fi
 
+echo "Pulling down and updating git submodules"
+git submodule init
+git submodule update
+
 if [ ! -d "$OUTDIR/$DOJODIR" ]; then
 	echo "Retrieving Dojo $VERSION"
-	$GET http://download.dojotoolkit.org/release-$VERSION/$DOJODIR.tar.gz | tar -C "$OUTDIR" -xz
+	$GET http://download.dojotoolkit.org/release-$VERSION/$DOJODIR.tar.gz 2> /dev/null | tar -C "$OUTDIR" -xz
 	echo "Dojo extracted to $OUTDIR/$DOJODIR"
 
     echo "Shimming dojox for AMD"
     ln -s "$OUTDIR/dojox-main-shim.js" "$OUTDIR/$DOJODIR/dojox/main.js"
 fi
 
-;; TODO: setup requirejs
+echo "Building requirejs (seems to require that node be version 0.4.X)"
+cd "$VENDORDIR/requirejs/dist/"
+./dist-build.sh "$RJSVERSION"
+cd "$ROOT/src"
+ln -s "vendor/requirejs-build/$RJSVERSION/r.js" r.js
+cd "$OUTDIR"
+mkdir -p require
+cd require
+ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/require.js" require.js
+ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/i18n.js" i18n.js
+ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/text.js" text.js
+ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/order.js" order.js.js
 
+cd "$PWD"
 echo "Done!"

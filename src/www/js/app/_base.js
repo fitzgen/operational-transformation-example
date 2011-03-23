@@ -21,10 +21,5 @@ require({
       main: 'main.js',
       lib: '.'
     }
-  ],
-
-  // set the path for the require plugins—text, i18n, etc.
-  paths: {
-    require: 'requirejs-0.23.0/require'
-  }
+  ]
 }, ['app/base']);
