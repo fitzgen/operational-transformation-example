@@ -1,0 +1,12 @@
+[submodule "src/vendor/node-static"]
+	path = src/vendor/node-static
+	url = https://github.com/cloudhead/node-static.git
+[submodule "src/vendor/socket.io"]
+	path = src/vendor/socket.io
+	url = https://github.com/LearnBoost/Socket.IO-node.git
+[submodule "src/vendor/operational-transformation"]
+	path = src/vendor/operational-transformation
+	url = https://github.com/fitzgen/operational-transformation.git
+[submodule "src/vendor/requirejs"]
+	path = src/vendor/requirejs
+	url = https://github.com/jrburke/requirejs.git
