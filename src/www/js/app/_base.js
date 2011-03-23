@@ -14,6 +14,12 @@ require({
       location: 'dojo-release-1.6.0-src/dijit',
       main: 'lib/main',
       lib: '.'
+    },
+    {
+      name: 'dojox',
+      location: 'dojo-release-1.6.0-src/dojox',
+      main: 'main.js',
+      lib: '.'
     }
   ],
 

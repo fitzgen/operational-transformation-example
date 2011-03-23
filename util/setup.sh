@@ -2,14 +2,21 @@
 
 set -e
 
-OUTDIR="../src/js"
+PWD=$(pwd)
+UTILDIR="$PWD/$(dirname $0)"
+ROOT=${UTILDIR/\/util/}
+
+OUTDIR="$ROOT/src/www/js"
 VERSION="1.6.0"
 RJSVERSION="0.23.0"
 
 DOJODIR="dojo-release-${VERSION}-src"
 REQUIREJSDIR="requirejs-${RJSVERSION}"
 
-OUTDIR=$(cd "$OUTDIR" &> /dev/null && pwd || echo "")
+if [ ! -d "$OUTDIR" ]; then
+	echo "Output directory not found: $OUTDIR"
+	exit 1
+fi
 
 if [ -x $(which wget) ]; then
 	GET="wget --no-check-certificate -O -"
@@ -20,15 +27,20 @@ else
 	exit 1
 fi
 
-if [ "$OUTDIR" = "" ]; then
-	echo "Output directory not found"
-	exit 1
+if [ ! -d "$OUTDIR/operational-transformation" ]; then
+    echo "Retrieving operational-transformation"
+    $GET https://github.com/fitzgen/operational-transformation/tarball/master \
+        | tar -C "$OUTDIR" -xz
+    mv "$OUTDIR/fitzgen"* "$OUTDIR/operational-transformation"
 fi
 
 if [ ! -d "$OUTDIR/$DOJODIR" ]; then
 	echo "Retrieving Dojo $VERSION"
-	$GET http://download.dojotoolkit.org/release-$VERSION/$DOJODIR.tar.gz | tar -C "$OUTDIR" -xzf -
+	$GET http://download.dojotoolkit.org/release-$VERSION/$DOJODIR.tar.gz | tar -C "$OUTDIR" -xz
 	echo "Dojo extracted to $OUTDIR/$DOJODIR"
+
+    echo "Shimming dojox for AMD"
+    ln -s "$OUTDIR/dojox-main-shim.js" "$OUTDIR/$DOJODIR/dojox/main.js"
 fi
 
 if [ ! -d "$OUTDIR/$REQUIREJSDIR" ]; then

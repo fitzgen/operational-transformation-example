@@ -2,7 +2,7 @@
 
 set -e
 
-RJSVERSION="0.23.0"
+RJSVERSION="0.24.0"
 REQUIREJSDIR="../src/js/requirejs-${RJSVERSION}"
 PROFILE="../profiles/app.js"
 
