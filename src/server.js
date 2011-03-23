@@ -1,6 +1,6 @@
 require([
     './vendor/operational-transformation/apply',
-    './vendor/operational-transformaion/ot',
+    './vendor/operational-transformation/ot',
     'http',
     'url',
     'path',
