@@ -33,7 +33,7 @@ git submodule update
 
 if [ ! -d "$OUTDIR/$DOJODIR" ]; then
 	echo "Retrieving Dojo $VERSION"
-	$GET http://download.dojotoolkit.org/release-$VERSION/$DOJODIR.tar.gz 2> /dev/null | tar -C "$OUTDIR" -xz
+	$GET http://download.dojotoolkit.org/release-$VERSION/$DOJODIR.tar.gz | tar -C "$OUTDIR" -xz
 	echo "Dojo extracted to $OUTDIR/$DOJODIR"
 
     echo "Shimming dojox for AMD"
@@ -41,17 +41,28 @@ if [ ! -d "$OUTDIR/$DOJODIR" ]; then
 fi
 
 echo "Building requirejs (seems to require that node be version 0.4.X)"
-cd "$VENDORDIR/requirejs/dist/"
-./dist-build.sh "$RJSVERSION"
+if [ ! -d "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION" ]; then
+    cd "$VENDORDIR/requirejs/dist/"
+    ./dist-build.sh "$RJSVERSION"
+fi
 cd "$ROOT/src"
-ln -s "vendor/requirejs-build/$RJSVERSION/r.js" r.js
+if [ ! -L r.js ]; then
+    ln -s "vendor/requirejs-build/$RJSVERSION/r.js" r.js
+fi
 cd "$OUTDIR"
-mkdir -p require
-cd require
+rm -rf require/
+mkdir -p require/
+cd require/
 ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/require.js" require.js
 ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/i18n.js" i18n.js
 ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/text.js" text.js
 ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/order.js" order.js.js
+
+echo "Running conversion script on submodules"
+cd "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/build/convert/commonjs"
+convert="../../../bin/x convert.js"
+$convert "$VENDORDIR/socket.io" "$VENDORDIR/socket.io" &> /dev/null
+$convert "$VENDORDIR/node-static" "$VENDORDIR/node-static" &> /dev/null
 
 cd "$PWD"
 echo "Done!"
