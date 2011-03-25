@@ -3,9 +3,6 @@ define([
     'app/socket'
 ], function (OTClient, socket) {
 
-    console.log("OTClient");
-    console.log(OTClient);
-
     var newButton = dojo.create("button", {
             id: 'new-document',
             innerHTML: 'New Document'
@@ -40,7 +37,7 @@ define([
     }
 
     function init (id) {
-        socket("/comet", function (connection) {
+        socket(function (connection) {
             OTClient.OTDocument({
                 id: id,
                 socket: connection,
@@ -49,7 +46,9 @@ define([
                         return textarea.innerHTML;
                     },
                     getSelection: function () {
-                        // TODO
+                        // TODO dijit.range.getSelection (in
+                        // dijit/_editor/range.js). Need to move to dijit.Editor
+                        // to use this though.
                     },
                     update: function (text /* TODO: cursor position */) {
                         dojo.removeAttr(textarea, "disabled");
