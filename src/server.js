@@ -10,6 +10,7 @@ require([
 
     // Serve the static files with node-static.
 
+
     var staticServer = new nodeStatic.Server("./www");
     var port = process.argv[3]
         ? Number(process.argv[3])
@@ -24,6 +25,7 @@ require([
 
     // Handle communication between the network layer and the OT layer.
 
+
     // This object should have the following structure:
     //
     //     { <client id> : <client connection object> }
@@ -34,6 +36,8 @@ require([
     //     { <document id> : { <client id> : true } }
     var documents = {};
 
+    // Send a message to a single client (by id). If message is not a string,
+    // JSON.stringify it.
     function send (clientId, message) {
         if ( clientId in clients ) {
             message = typeof message === "string"
@@ -45,6 +49,8 @@ require([
         }
     }
 
+    // Broadcast a message to a every client which is editing the document whose
+    // id is docId. If message is not a string, JSON.stringify it.
     function broadcast (docId, message) {
         if ( docId in documents ) {
             message = typeof message === "string"
@@ -58,11 +64,14 @@ require([
         }
     }
 
+    // Register a new client in the above data structures when they begin
+    // editing a document.
     function addClient (docId, clientId, client) {
         documents[docId] = clientsByDocument[docId] || {};
         documents[docId][clientId] = true;
     }
 
+    // Deregister a client and remove them from the above data structures.
     function removeClient (docId, clientId) {
         if ( documents[docId] ) {
             delete documents[docId][clientId];
@@ -72,10 +81,13 @@ require([
         }
     }
 
+    // Initialize the public API of our OT layer.
     var otManager = ot({
         store: memoryStore
     });
 
+    // Handle new socket connections (can be reconnects) and create a new
+    // document for them if there is no existing doc id supplied.
     function handleConnect (data, callback) {
         var docId;
         if ( data.id ) {
@@ -95,6 +107,8 @@ require([
         // TODO: pass to otManager and handle success/fail
     }
 
+    // Start listening for new client connections, and when they connect, attach
+    // all of our listeners, etc.
     io.listen(server).on('connection', function (client) {
 
         var docId,
