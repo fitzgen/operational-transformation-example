@@ -1,128 +1,129 @@
 require([
+    'http',
     './vendor/operational-transformation/apply',
     './vendor/operational-transformation/ot',
-    'http',
-    'url',
-    'path',
-    'fs'
-], function (apply, ot, http, url, path, fs) {
+    './vendor/operational-transformation/stores/memory-store',
+    './vendor/node-static/lib/node-static',
+    './vendor/socket.io/lib/socket.io/index'
+], function (http, apply, ot, memoryStore, nodeStatic, io) {
 
-    // This module implements a server which does 2 things:
+
+    // Serve the static files with node-static.
+
+    var staticServer = new nodeStatic.Server("./www");
+    var port = process.argv[3]
+        ? Number(process.argv[3])
+        : 8080;
+    var server = http.createServer(function (request, response) {
+        request.addListener('end', function () {
+            staticServer.serve(request, response);
+        });
+    });
+    server.listen(port, console.log.bind(console, "Listening on port " + port));
+
+
+    // Handle communication between the network layer and the OT layer.
+
+    // This object should have the following structure:
     //
-    // 1. Serves static files
+    //     { <client id> : <client connection object> }
+    var clients = {};
+
+    // This object should have the following structure:
     //
-    // 2. Comet server which glues together the OT with communicating to the
-    //    client.
-    //
-    // We need a simple static file server for all the js/css/etc. In
-    // production, you would run this comet server behind apache/nginx and only
-    // proxy requests coming to '/comet' to this server. The static file server
-    // is definitely not robust. This is just an example app. Don't use this in
-    // a real situation.
+    //     { <document id> : { <client id> : true } }
+    var documents = {};
 
-    // Static stuff
-
-    function send404 (resp) {
-        resp.writeHead(404, {
-            'Content-Type': 'text/plain'
-        });
-        resp.end("Not found.");
-    }
-
-    function send403 (resp) {
-        resp.writeHead(403, {
-            'Content-Type': 'text/plain'
-        });
-        resp.end("Forbidden");
-    }
-
-    function send500 (resp) {
-        resp.writeHead(500, {
-            'Content-Type': 'text/plain'
-        });
-        resp.end("Server error.");
-    }
-
-    function send200 (contentType, buffer, resp) {
-        resp.writeHead(200, {
-            'Content-Type': contentType
-        });
-        resp.write(buffer);
-        resp.end();
-    }
-
-    function getContentType (pathname) {
-        return {
-            '.js': 'text/javascript',
-            '.css': 'text/css',
-            '.html': 'text/html'
-        }[path.extname(pathname)] || 'text/plain';
-    }
-
-    function serveStatic (publicRoot, pathname, resp) {
-        if ( pathname.indexOf('..') >= 0 ) {
-            send403(resp);
+    function send (clientId, message) {
+        if ( clientId in clients ) {
+            message = typeof message === "string"
+                ? message
+                : JSON.stringify(message);
+            clients[clientId].send(message);
         } else {
-            if ( pathname === '/' ) {
-                pathname = '/index.html';
+            throw new Error('No such client ' + clientId);
+        }
+    }
+
+    function broadcast (docId, message) {
+        if ( docId in documents ) {
+            message = typeof message === "string"
+                ? message
+                : JSON.stringify(message);
+            Object.keys(documents[id]).forEach(function (clientId) {
+                send(clientId, message);
+            });
+        } else {
+
+        }
+    }
+
+    function addClient (docId, clientId, client) {
+        documents[docId] = clientsByDocument[docId] || {};
+        documents[docId][clientId] = true;
+    }
+
+    function removeClient (docId, clientId) {
+        if ( documents[docId] ) {
+            delete documents[docId][clientId];
+            if ( Object.keys(documents[docId]).length === 0 ) {
+                delete documents[docId];
             }
-            console.log(pathname);
-            fs.readFile(path.join(publicRoot, pathname), function (error, buffer) {
-                if ( error ) {
-                    if ( error.errno === 2 ) {
-                        send404(resp);
-                    } else {
-                        send500(resp);
-                    }
-                } else {
-                    send200(getContentType(pathname), buffer, resp);
-                }
+        }
+    }
+
+    var otManager = ot({
+        store: memoryStore
+    });
+
+    function handleConnect (data, callback) {
+        var docId;
+        if ( data.id ) {
+            docId = data.id;
+            addClient(docId, clientId, client);
+            callback(docId);
+        } else {
+            otManager.newDocument(function (doc) {
+                docId = doc.id;
+                addClient(docId, clientId, client);
+                callback(docId);
             });
         }
-    };
-
-    // ## Comet stuff
-
-    var docsToClients = {};
-
-    // ot.on();
-
-    function handleComet (data, response) {
-        // if ( data === null ) {
-        //     // pass?
-        // } else if ( ! data.id ) {
-        //     ot.newDocument(function (err, doc) {
-        //         response.writeHead(200, {
-        //         });
-        //         response.end(JSON.stringify(doc));
-        //         docsToClients[doc.id] = [];
-        //     });
-        // } else {
-        // }
-        console.log(data);
-        response.end("ok");
     }
 
-    var port = process.argv[3] ? Number(process.argv[3]) : 8080;
+    function handleUpdate (data, callback) {
+        // TODO: pass to otManager and handle success/fail
+    }
 
-    http.createServer(function (request, response) {
-        var dataBuffer = "";
-        request.setEncoding('utf8');
-        request.on('data', function (chunk) {
-            dataBuffer += chunk;
-        });
-        request.on('end', function () {
-            var path = url.parse(request.url).pathname;
-            if ( path === "/comet" ) {
-                response.writeHead(200, {
-                    'Content-Type': 'text/plain'
+    io.listen(server).on('connection', function (client) {
+
+        var docId,
+            clientId = client.sessionId;
+
+        client.on('message', function (event) {
+            console.log("Message from " clientId + ": " + event);
+            event = JSON.parse(event);
+
+            switch ( event.type ) {
+            case 'connect':
+                handleConnect(event.data, function (id) {
+                    docId = id;
                 });
-                handleComet(dataBuffer !== "" ? JSON.parse(dataBuffer) : null,
-                            response);
-            } else {
-                serveStatic('www/', path, response);
+                break;
+            case 'update':
+                handleUpdate(event.data, function () {
+                    // TODO
+                });
+                break;
+            default:
+                throw new Error('Unknown message message type: ' + data.type);
             }
         });
-    }).listen(port, null, console.log.bind(console, 'Listening on ' + port));
+
+        client.on('disconnect', function () {
+            removeClient(docId, clientId);
+        });
+
+    });
 
 });
