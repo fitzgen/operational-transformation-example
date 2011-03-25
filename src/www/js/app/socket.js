@@ -1,12 +1,11 @@
 define([
     'dojo',
-    'dojox',
-    'dojox/socket'
-], function (dojo, dojox, dojoSocket) {
-    return function (url, callback) {
-        var socket = dojoSocket.LongPoll(url);
-        socket.on("open", function () {
-            callback({
+    '../socket.io.js'
+], function (dojo) {
+    return function (callback) {
+        var socket = new io.Socket();
+        socket.on("connect", function () {
+            callback(window.socket = {
                 send: function (data) {
                     socket.send(dojo.toJson(data));
                 },
@@ -17,5 +16,6 @@ define([
                 }
             });
         });
+        socket.connect();
     };
 });
