@@ -1,11 +1,18 @@
+/*jslint onevar: false, undef: true, eqeqeq: true, bitwise: true,
+  newcap: true, immed: true, nomen: false, white: false, plusplus: false,
+  laxbreak: true */
+
+/*global require, process, console */
+
 require([
     'http',
     './vendor/operational-transformation/apply',
     './vendor/operational-transformation/ot',
+    './vendor/operational-transformation/messages',
     './vendor/operational-transformation/stores/memory-store',
     './vendor/node-static/lib/node-static',
     './vendor/socket.io/lib/socket.io/index'
-], function (http, apply, ot, memoryStore, nodeStatic, io) {
+], function (http, apply, ot, messages, memoryStore, nodeStatic, io) {
 
 
     // Serve the static files with node-static.
@@ -88,16 +95,27 @@ require([
         store: memoryStore
     });
 
+    otManager.on("update", function (msg) {
+        broadcast(messages.id(msg), msg);
+    });
+
+    otManager.on("error", function (e) {
+        throw e;
+    });
+
     // Handle new socket connections (can be reconnects) and create a new
     // document for them if there is no existing doc id supplied.
-    function handleConnect (data, callback) {
+    function handleConnect (clientId, client, data, callback) {
         var docId;
         if ( data.id ) {
             docId = data.id;
             addClient(docId, clientId, client);
             callback(docId);
         } else {
-            otManager.newDocument(function (doc) {
+            otManager.newDocument(function (err, doc) {
+                if ( err ) {
+                    throw err;
+                }
                 docId = doc.id;
                 addClient(docId, clientId, client);
                 callback(docId);
@@ -106,7 +124,7 @@ require([
     }
 
     function handleUpdate (data, callback) {
-        // TODO: pass to otManager and handle success/fail
+        otManager.applyOperations(data);
     }
 
     // Start listening for new client connections, and when they connect, attach
@@ -117,22 +135,20 @@ require([
             clientId = client.sessionId;
 
         client.on('message', function (event) {
-            console.log("Message from " clientId + ": " + event);
+            console.log("Message from " + clientId + ": " + event);
             event = JSON.parse(event);
 
             switch ( event.type ) {
             case 'connect':
-                handleConnect(event.data, function (id) {
+                handleConnect(clientId, client, event.data, function (id) {
                     docId = id;
                 });
                 break;
             case 'update':
-                handleUpdate(event.data, function () {
-                    // TODO
-                });
+                handleUpdate(event.data);
                 break;
             default:
-                throw new Error('Unknown message message type: ' + data.type);
+                throw new Error('Unknown message message type: ' + event.type);
             }
         });
 
