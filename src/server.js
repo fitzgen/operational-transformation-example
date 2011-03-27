@@ -67,8 +67,9 @@ require([
     // Register a new client in the above data structures when they begin
     // editing a document.
     function addClient (docId, clientId, client) {
-        documents[docId] = clientsByDocument[docId] || {};
+        documents[docId] = documents[docId] || {};
         documents[docId][clientId] = true;
+        clients[clientId] = client;
     }
 
     // Deregister a client and remove them from the above data structures.
@@ -79,6 +80,7 @@ require([
                 delete documents[docId];
             }
         }
+        delete clients[clientId];
     }
 
     // Initialize the public API of our OT layer.
