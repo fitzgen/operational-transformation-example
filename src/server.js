@@ -60,7 +60,7 @@ require([
                 send(clientId, message);
             });
         } else {
-
+            throw new Error('No such document ' + docId);
         }
     }
 
