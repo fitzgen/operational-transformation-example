@@ -1,7 +1,14 @@
+/*jslint onevar: true, undef: true, eqeqeq: true, bitwise: true,
+  newcap: true, immed: true, nomen: false, white: false, plusplus: false,
+  laxbreak: true */
+
+/*global define, prompt */
+
 define([
     'operational-transformation/client',
-    'app/socket'
-], function (OTClient, socket) {
+    'app/socket',
+    'dojo'
+], function (OTClient, socket, dojo) {
 
     var newButton = dojo.create("button", {
             id: 'new-document',
@@ -15,7 +22,9 @@ define([
 
         textarea = dojo.create("textarea", {
             id: "document",
-            disabled: true
+            style: {
+                display: "none"
+            }
         }, dojo.body());
 
     function hideButtons () {
@@ -43,16 +52,17 @@ define([
                 socket: connection,
                 ui: {
                     getDocument: function () {
-                        return textarea.innerHTML;
+                        return textarea.value;
                     },
                     getSelection: function () {
-                        // TODO dijit.range.getSelection (in
-                        // dijit/_editor/range.js). Need to move to dijit.Editor
-                        // to use this though.
+                        return {
+                            start: textarea.selectionStart,
+                            end: textarea.selectionEnd
+                        };
                     },
                     update: function (text /* TODO: cursor position */) {
-                        dojo.removeAttr(textarea, "disabled");
-                        textarea.innerHTML = text;
+                        textarea.style.display = "block";
+                        textarea.value = text;
                     }
                 }
             });
