@@ -63,7 +63,7 @@ require([
             message = typeof message === "string"
                 ? message
                 : JSON.stringify(message);
-            Object.keys(documents[id]).forEach(function (clientId) {
+            Object.keys(documents[docId]).forEach(function (clientId) {
                 send(clientId, message);
             });
         } else {
@@ -96,10 +96,15 @@ require([
     });
 
     otManager.on("update", function (msg) {
-        broadcast(messages.id(msg), msg);
+        console.log("Broadcasting to " + msg.id + ": " + JSON.stringify(msg));
+        broadcast(messages.id(msg), {
+            type: "update",
+            data: msg
+        });
     });
 
     otManager.on("error", function (e) {
+        console.error(e);
         throw e;
     });
 
@@ -123,7 +128,7 @@ require([
         }
     }
 
-    function handleUpdate (data, callback) {
+    function handleUpdate (data) {
         otManager.applyOperations(data);
     }
 
@@ -142,6 +147,20 @@ require([
             case 'connect':
                 handleConnect(clientId, client, event.data, function (id) {
                     docId = id;
+                    memoryStore.getDocument(id, function (err, doc) {
+                        if ( err ) {
+                            console.error(err);
+                            throw err;
+                        }
+                        var msg = {};
+                        messages.id(msg, doc.id);
+                        messages.revision(msg, doc.rev);
+                        messages.document(msg, doc.doc);
+                        client.send({
+                            type: "connect",
+                            data: msg
+                        });
+                    });
                 });
                 break;
             case 'update':
