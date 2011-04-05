@@ -129,7 +129,7 @@ require([
     }
 
     function handleUpdate (data) {
-        otManager.applyOperations(data);
+        otManager.applyOperation(data);
     }
 
     // Start listening for new client connections, and when they connect, attach
