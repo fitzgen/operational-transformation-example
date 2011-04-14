@@ -6,12 +6,12 @@
 
 require([
     'http',
-    './vendor/operational-transformation/apply',
-    './vendor/operational-transformation/ot',
-    './vendor/operational-transformation/messages',
-    './vendor/operational-transformation/stores/memory-store',
-    './vendor/node-static/lib/node-static',
-    './vendor/socket.io/lib/socket.io/index'
+    'operational-transformation/apply',
+    'operational-transformation/ot',
+    'operational-transformation/messages',
+    'operational-transformation/stores/memory-store',
+    'node-static/lib/node-static',
+    'socket.io/lib/socket.io/index'
 ], function (http, apply, ot, messages, memoryStore, nodeStatic, io) {
 
 
