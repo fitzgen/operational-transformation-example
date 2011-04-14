@@ -1,4 +1,4 @@
 src/www/js/dojo-*
 src/www/js/require
 src/r.js
-src/vendor/requirejs-build
+src/node_modules/requirejs-build
