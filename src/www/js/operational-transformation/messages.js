@@ -1,1 +1,1 @@
-../../../vendor/operational-transformation/messages.js
+../../../node_modules/operational-transformation/./messages.js

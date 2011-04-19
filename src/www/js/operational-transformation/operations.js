@@ -1,1 +1,1 @@
-../../../vendor/operational-transformation/operations.js
+../../../node_modules/operational-transformation/./operations.js

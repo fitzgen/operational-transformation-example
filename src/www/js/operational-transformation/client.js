@@ -1,1 +1,1 @@
-../../../vendor/operational-transformation/client.js
+../../../node_modules/operational-transformation/./client.js

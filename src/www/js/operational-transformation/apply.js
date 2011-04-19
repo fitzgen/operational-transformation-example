@@ -1,1 +1,1 @@
-../../../vendor/operational-transformation/apply.js
+../../../node_modules/operational-transformation/./apply.js
