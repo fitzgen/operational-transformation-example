@@ -146,8 +146,7 @@ io.listen(server).on('connection', function (client) {
                 docId = id;
                 memoryStore.getDocument(id, function (err, doc) {
                     if ( err ) {
-                        console.error(err);
-                        throw err;
+                        console.error("Error: " + err);
                     }
                     var msg = {};
                     messages.id(msg, doc.id);
