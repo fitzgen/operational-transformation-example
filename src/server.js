@@ -147,6 +147,7 @@ io.listen(server).on('connection', function (client) {
                 memoryStore.getDocument(id, function (err, doc) {
                     if ( err ) {
                         console.error("Error: " + err);
+                        /* TODO: Send back response saying there is no such document */
                     }
                     var msg = {};
                     messages.id(msg, doc.id);
