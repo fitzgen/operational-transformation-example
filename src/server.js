@@ -102,8 +102,7 @@ otManager.on("update", function (msg) {
 });
 
 otManager.on("error", function (e) {
-    console.error(e);
-    throw e;
+    console.error("Error: " + e);
 });
 
 // Handle new socket connections (can be reconnects) and create a new
