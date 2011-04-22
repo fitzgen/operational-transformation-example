@@ -6,7 +6,7 @@ PWD=$(pwd)
 UTILDIR="$PWD/$(dirname $0)"
 ROOT=${UTILDIR/\/util/}
 OUTDIR="$ROOT/src/www/js"
-VENDORDIR="$ROOT/src/vendor"
+VENDORDIR="$ROOT/src/node_modules"
 
 VERSION="1.6.0"
 RJSVERSION="0.24.0"
@@ -47,7 +47,7 @@ if [ ! -d "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION" ]; then
 fi
 cd "$ROOT/src"
 if [ ! -L r.js ]; then
-    ln -s "vendor/requirejs-build/$RJSVERSION/r.js" r.js
+    ln -s "node_modules/requirejs-build/$RJSVERSION/r.js" r.js
 fi
 cd "$OUTDIR"
 rm -rf require/
@@ -57,12 +57,6 @@ ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/require.js" require.js
 ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/i18n.js" i18n.js
 ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/text.js" text.js
 ln -s "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/order.js" order.js.js
-
-echo "Running conversion script on submodules"
-cd "$VENDORDIR/requirejs-build/requirejs-$RJSVERSION/build/convert/commonjs"
-convert="../../../bin/x convert.js"
-$convert "$VENDORDIR/socket.io" "$VENDORDIR/socket.io" &> /dev/null
-$convert "$VENDORDIR/node-static" "$VENDORDIR/node-static" &> /dev/null
 
 cd "$PWD"
 echo "Done!"

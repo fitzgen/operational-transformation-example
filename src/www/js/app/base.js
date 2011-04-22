@@ -23,7 +23,9 @@ define([
         textarea = dojo.create("textarea", {
             id: "document",
             style: {
-                display: "none"
+                display: "none",
+                width: "500px",
+                height: "200px"
             }
         }, dojo.body());
 

@@ -6,7 +6,7 @@ PWD=$(pwd)
 UTILDIR="$PWD/$(dirname $0)"
 ROOT=${UTILDIR/\/util/}
 OUTDIR="$ROOT/src/www/js"
-VENDORDIR="$ROOT/src/vendor"
+VENDORDIR="$ROOT/src/node_modules"
 
 VERSION="1.6.0"
 RJSVERSION="0.24.0"

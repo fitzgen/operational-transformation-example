@@ -1,1 +1,1 @@
-../../../vendor/operational-transformation/xform.js
+../../../node_modules/operational-transformation/./xform.js
