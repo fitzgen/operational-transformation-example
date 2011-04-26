@@ -14,8 +14,8 @@ require({
     'operational-transformation/ot',
     'operational-transformation/messages',
     'operational-transformation/stores/memory-store',
-    'node-static/lib/node-static',
-    'socket.io/lib/socket.io/index'
+    'node-static',
+    'socket.io'
 ], function (http, apply, ot, messages, memoryStore, nodeStatic, io) {
 
 
