@@ -1,12 +1,28 @@
 # Operational Transformation Example
 
 This is an implementation of a real time collaborative document editor which
-uses my Operational Transformation library.
+uses my [Operational Transformation library][ot-lib].
 
-I have only tested it with Node 0.4.3 and a fork of RequireJS 0.24.0 I have made
-(which isn't in the repo yet). The changes I had to make to RequireJS for this
-project are currently open pull requests and should be merged in within a week
-or so (as of 3/24/11).
+[ot-lib]: https://github.com/fitzgen/operational-transformation
+
+Works with Node 0.4.X.
+
+## Installing and Running
+
+    $ git clone https://github.com/fitzgen/operational-transformation-example.git
+    $ cd operational-transformation-example/
+    $ ./util/setup.sh
+    $ cd src/
+    $ node r.js server.js
+    25 Apr 21:56:13 - Your node instance does not have root privileges. This means that the flash XML policy file will be served inline instead of on port 843. This will slow down initial connections slightly.
+    25 Apr 21:56:13 - socket.io ready - accepting connections
+    Listening on port 8080
+
+Now just open a couple tabs in your browser and point them to
+http://127.0.0.1:8080/ and you can create and collaboratively edit a plain text
+document between the tabs. *(At the time of this writing, April 25th 2011, you
+have to use firebug or some other web inspector to find out what the document ID
+is so that your second tab can join the first's session).*
 
 ## Utility Scripts
 
