@@ -62,9 +62,15 @@ define([
                             end: textarea.selectionEnd
                         };
                     },
-                    update: function (text /* TODO: cursor position */) {
+                    update: function (text, selection) {
                         textarea.style.display = "block";
                         textarea.value = text;
+                        if ( selection.start ) {
+                            textarea.selectionStart = selection.start;
+                        }
+                        if ( selection.end ) {
+                            textarea.selectionEnd = selection.end;
+                        }
                     }
                 }
             });
