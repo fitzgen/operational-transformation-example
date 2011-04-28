@@ -63,6 +63,7 @@ define([
                         };
                     },
                     update: function (text, selection) {
+                        selection = selection || {};
                         textarea.style.display = "block";
                         textarea.value = text;
                         if ( selection.start ) {
