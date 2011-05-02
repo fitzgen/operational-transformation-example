@@ -2,13 +2,14 @@
   newcap: true, immed: true, nomen: false, white: false, plusplus: false,
   laxbreak: true */
 
-/*global define, prompt */
+/*global define, prompt, window, history */
 
 define([
     'operational-transformation/client',
+    'operational-transformation/messages',
     'app/socket',
     'dojo'
-], function (OTClient, socket, dojo) {
+], function (OTClient, messages, socket, dojo) {
 
     var newButton = dojo.create("button", {
             id: 'new-document',
@@ -52,6 +53,7 @@ define([
             OTClient.OTDocument({
                 id: id,
                 socket: connection,
+                pubsub: dojo,
                 ui: {
                     getDocument: function () {
                         return textarea.value;
@@ -86,6 +88,22 @@ define([
     attachToButton(joinButton, function () {
         hideButtons();
         init(prompt("Document id:"));
+    });
+
+    if ( window.location.search && window.location.search !== "?" ) {
+        hideButtons();
+        init(window.location.search.replace("?", ""));
+    }
+
+    dojo.subscribe("/ot/connect", function (msg) {
+        history.replaceState({},
+                             "Document " + messages.id(msg),
+                             "?" + messages.id(msg));
+    });
+
+    dojo.subscribe("/ot/error", function (reason) {
+        // TODO: create a top level notificiation thing that can display this
+        // stuff.
     });
 
 });
